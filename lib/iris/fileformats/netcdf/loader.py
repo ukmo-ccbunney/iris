@@ -662,7 +662,7 @@ def load_cubes(file_sources, callback=None, constraints=None):
     # Deferred import to avoid circular imports.
     from iris.cube import Cube
     from iris.fileformats._nc_load_rules.helpers import _add_or_capture
-    from iris.fileformats.cf import CFReader
+    from iris.fileformats.cfzarr import CFReader
     from iris.io import run_callback
     from iris.loading import LoadProblems
 
