@@ -413,9 +413,11 @@ class Saver:
         else:
             # Given a filepath string/path : create a dataset from that
             try:
-                self.filepath = os.path.abspath(filename)
+                # self.filepath = os.path.abspath(filename)
+                self.filepath = filename
                 self._dataset = _thread_safe_nc.DatasetWrapper(
-                    self.filepath, mode="w", format=netcdf_format
+                    self.filepath,
+                    mode="w",  # format=netcdf_format
                 )
             except RuntimeError:
                 dir_name = os.path.dirname(self.filepath)
