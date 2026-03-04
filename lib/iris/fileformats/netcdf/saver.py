@@ -413,7 +413,8 @@ class Saver:
         else:
             # Given a filepath string/path : create a dataset from that
             try:
-                self.filepath = os.path.abspath(filename)
+                # self.filepath = os.path.abspath(filename)
+                self.filepath = filename
                 self._dataset = _thread_safe_nc.DatasetWrapper(
                     self.filepath, mode="w", format=netcdf_format
                 )
@@ -2951,7 +2952,6 @@ def save(
                     "same number of elements as the cube argument."
                 )
                 raise ValueError(msg)
-
     # Initialise Manager for saving
     # N.B. make the Saver compute=False, as we want control over creation of the
     # delayed-completion object.
