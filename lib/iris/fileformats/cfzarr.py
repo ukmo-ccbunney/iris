@@ -196,13 +196,17 @@ class CFVariable(metaclass=ABCMeta):
             setattr(self, name, value)
             return value
         # Zarr: just return attr, don't cache it
-        return self.cf_data.attrs.get(name, None)
+        # Try looking in the attributes first, then in the metadata (for zarr).
+        # TODO: This needs refining.
+        if name in self.cf_data.attrs:
+            return self.cf_data.attrs[name]
+        return self.cf_data.metadata.get(name)
 
-        if name in self._nc_attrs:
-            self._cf_attrs.add(name)
-        value = self.cf_data.attrs.get(name, None)
-        setattr(self, name, value)
-        return value
+        # if name in self._nc_attrs:
+        #     self._cf_attrs.add(name)
+        # value = self.cf_data.attrs.get(name, None)
+        # setattr(self, name, value)
+        # return value
 
     def __getitem__(self, key):
         return self.cf_data.__getitem__(key)
@@ -219,7 +223,9 @@ class CFVariable(metaclass=ABCMeta):
 
     def cf_attrs(self):
         """Return a list of all attribute name and value pairs of the CF-netCDF variable."""
-        return tuple((attr, self.getncattr(attr)) for attr in sorted(self._nc_attrs))
+        return tuple(
+            (attr, self.cf_data.attrs.get(attr)) for attr in sorted(self._nc_attrs)
+        )
 
     def cf_attrs_ignored(self):
         """Return a list of all ignored attribute name and value pairs of the CF-netCDF variable."""
@@ -1690,7 +1696,6 @@ class CFReader:
                 )
                 # Add appropriate "dimensionless" CF coordinate variables.
                 coordinates_attr = getattr(cf_variable, "coordinates", "")
-                # CB: breakpoint()
                 cf_group.update(
                     {
                         cf_name: self.cf_group[cf_name]
