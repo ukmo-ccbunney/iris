@@ -195,12 +195,23 @@ class CFVariable(metaclass=ABCMeta):
                 value = self.cf_data.attrs.get("_ARRAY_DIMENSIONS", ())
             setattr(self, name, value)
             return value
+        if name == "getncattr":
+            # Special case for getncattr, which is a method of netCDF4.
+            # Variable but not of zarr arrays. For zarr arrays, we just return a lambda that looks up the attribute in the attributes dict.
+            return lambda attr: self.cf_data.attrs.get(attr)
+
         # Zarr: just return attr, don't cache it
         # Try looking in the attributes first, then in the metadata (for zarr).
         # TODO: This needs refining.
         if name in self.cf_data.attrs:
             return self.cf_data.attrs[name]
-        return self.cf_data.metadata.get(name)
+
+        # Check in metadata:
+        if name in self.cf_data.metadata.to_dict():
+            return self.cf_data.metadata.to_dict()[name]
+
+        # Return attr from array iteslf
+        return getattr(self.cf_data, name)
 
         # if name in self._nc_attrs:
         #     self._cf_attrs.add(name)
